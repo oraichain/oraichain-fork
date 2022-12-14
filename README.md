@@ -9,23 +9,6 @@
 5. move priv_validator_key & node_key of the local node to the wanted location that we want to run. If using the the same local node, need to: oraid tendermint unsafe-reset-all first to clear all previous blocks, then replace the genesis file.
 6. oraid start --x-crisis-skip-assert-invariants
 
-Note: after upgrading, the logs show that the module stores are migrated
-
-Example:
-
-```
-6:53PM INF adding a new module: authz
-6:53PM INF migrating module bank from version 1 to version 2
-6:53PM INF migrating module distribution from version 1 to version 2
-6:53PM INF adding a new module: feegrant
-6:53PM INF migrating module gov from version 1 to version 2
-6:53PM INF migrating module ibc from version 1 to version 2
-6:53PM INF migrating module slashing from version 1 to version 2
-6:53PM INF migrating module staking from version 1 to version 2
-6:53PM INF migrating module transfer from version 1 to version 2
-6:53PM INF migrating module auth from version 1 to version 2
-```
-
 ## Steps to run the scripts to start forking:
 
 1. Setup a new node
