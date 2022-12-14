@@ -16,7 +16,7 @@ fi
 if [ $NEED_TO_RUN -eq 1 ]
 then
     # run the binary in background
-    oraid start &
+    oraid start --p2p.laddr tcp://0.0.0.0:46656 --grpc.address 0.0.0.0:8090 --rpc.laddr tcp://0.0.0.0:46657 &
 
     sleep 10 && pkill oraid
 fi

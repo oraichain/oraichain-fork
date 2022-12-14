@@ -32,7 +32,7 @@ node index.js
 4. Clear all network data and start over to apply the new genesis state
 
 ```
-oraid tendermint unsafe-reset-all && oraid start --x-crisis-skip-assert-invariants
+oraid tendermint unsafe-reset-all && oraid start --x-crisis-skip-assert-invariants --p2p.laddr tcp://0.0.0.0:46656 --grpc.address 0.0.0.0:8090 --rpc.laddr tcp://0.0.0.0:46657
 ```
 
 To clear the fork network and start over, type:
