@@ -5,7 +5,7 @@
 1. run a local node with new genesis
 2. let it run for a few blocks
 3. export its genesis
-4. collect slashing, distribution, staking & validators fields in the exported genesis and use jq to replace them in the wanted genesis
+4. collect slashing, staking & validators fields in the exported genesis and use jq to replace them in the wanted genesis
 5. move priv_validator_key & node_key of the local node to the wanted location that we want to run. If using the the same local node, need to: oraid tendermint unsafe-reset-all first to clear all previous blocks, then replace the genesis file.
 6. oraid start --x-crisis-skip-assert-invariants
 
