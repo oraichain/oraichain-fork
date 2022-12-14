@@ -20,7 +20,7 @@
 2. Export the genesis state of the node
 
 ```bash
-./export-genesis.sh
+RPC_PORT= GRPC_PORT= P2P_PORT= REST_PORT= ./export-genesis.sh 
 ```
 
 3. Process genesis state to inject the custom wallet into the network

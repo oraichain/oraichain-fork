@@ -1,6 +1,12 @@
 #!/bin/bash
 
 NEED_TO_RUN=${NEED_TO_RUN:-1}
+RPC_PORT=${RPC_PORT:-46657}
+GRPC_PORT=${GRPC_PORT:-8090}
+P2P_PORT=${P2P_PORT:-46656}
+REST_PORT=${REST_PORT:2317}
+
+sed -i "s/address *= *.*/address = \"tcp:\/\/0.0.0.0:$REST_PORT\"/g" .oraid/config/app.toml
 
 if [[ ! -f "./genesis.json" ]]
 then
@@ -16,7 +22,7 @@ fi
 if [ $NEED_TO_RUN -eq 1 ]
 then
     # run the binary in background
-    oraid start --p2p.laddr tcp://0.0.0.0:46656 --grpc.address 0.0.0.0:8090 --rpc.laddr tcp://0.0.0.0:46657 &
+    oraid start --p2p.laddr tcp://0.0.0.0:$P2P_PORT --grpc.address 0.0.0.0:$GRPC_PORT --rpc.laddr tcp://0.0.0.0:$RPC_PORT &
 
     sleep 10 && pkill oraid
 fi

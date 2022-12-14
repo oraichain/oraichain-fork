@@ -29,8 +29,6 @@ else
     sed -i "s/enabled-unsafe-cors *= *.*/enabled-unsafe-cors = true/g" .oraid/config/app.toml
     sed -i "s/cors_allowed_origins *= *.*/cors_allowed_origins = \[\"*\"\]/g" .oraid/config/config.toml
     sed -i "1,/\<laddr\>/{s/\<laddr\> *= *.*/laddr = \"tcp:\/\/0.0.0.0:36657\"/g}" .oraid/config/config.toml # replace exactly the string laddr with\< and \>
-    
-    sed -i "s/address *= *.*/address = \"tcp:\/\/0.0.0.0:2317\"/g" .oraid/config/app.toml
 
     # submit a genesis validator tx
     ## Workraround for https://github.com/cosmos/cosmos-sdk/issues/8251
