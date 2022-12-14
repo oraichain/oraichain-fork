@@ -6,7 +6,8 @@ GRPC_PORT=${GRPC_PORT:-8090}
 P2P_PORT=${P2P_PORT:-46656}
 REST_PORT=${REST_PORT:2317}
 
-sed -i "s/address *= *.*/address = \"tcp:\/\/0.0.0.0:$REST_PORT\"/g" .oraid/config/app.toml
+
+sed -i "0,/address/s/address *= *.*/address = \"tcp:\/\/0.0.0.0:$REST_PORT\"/g" .oraid/config/app.toml # reference: https://stackoverflow.com/a/9453461
 
 if [[ ! -f "./genesis.json" ]]
 then
