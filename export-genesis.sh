@@ -14,7 +14,6 @@ then
     oraid start &
 
     sleep 10 && pkill oraid
-else
-    # export genesis state to file
-    oraid export 2>&1 | tee export-genesis.json
 fi
+# export genesis state to file
+oraid export 2>&1 | tee export-genesis.json
