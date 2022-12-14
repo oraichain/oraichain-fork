@@ -7,6 +7,10 @@ const genesisJsonPath = '.oraid/config/genesis.json';
 const genesisJsonUrl = 'https://orai.s3.us-east-2.amazonaws.com/export-genesis.json';
 
 const readGenesis = () => {
+    if (!fs.existsSync(exportGenesisJsonPath)) {
+        console.log("You need to export the genesis state of your newly created node first before running this script.");
+        return;
+    }
     const result = JSON.parse(Buffer.from(fs.readFileSync(exportGenesisJsonPath)).toString('ascii'));
     const slashing = JSON.stringify(result.app_state.slashing);
     const staking = JSON.stringify(result.app_state.staking);
