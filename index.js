@@ -82,7 +82,7 @@ const readLargeBalances = async () => {
 
 const jqUpdateContractStateGroupMultisigData = () => {
     // 00076D656D62657273 is 'members' in hex
-    return `.app_state.wasm.contracts[.app_state.wasm.contracts| map(.contract_address == "${groupAddress}") | index(true)].contract_state = [{"key":"00076D656D62657273${devSharedHexBytes}","value":"MQ=="},{"key":"746F74616C","value":"MQ=="},{"key":"61646D696E","value":"${adminMultiSigInBase64}"}]`;
+    return `.app_state.wasm.contracts[.app_state.wasm.contracts| map(.contract_address == "${groupAddress}") | index(true)].contract_state = [{"key":"00076D656D62657273${devSharedHexBytes}","value":"Mw=="},{"key":"746F74616C","value":"Mw=="},{"key":"61646D696E","value":"${adminMultiSigInBase64}"}]`;
 }
 
 readGenesis()
