@@ -6,6 +6,9 @@ const exportGenesisJsonPath = './export-genesis.json';
 const wantedGenesisStateJsonPath = './genesis.json';
 const genesisJsonPath = '.oraid/config/genesis.json';
 const notBondedTokenPoolsModuleName = "orai1tygms3xhhs3yv487phx3dw4a95jn7t7ljgraws";
+const devSharedHexBytes = "ACE2B31E144AC57F99807BA85D299A7B1A755E2F" // can convert online using: https://slowli.github.io/bech32-buffer/ or bech32 lib. Encoding: orai. Last mnemonic keyword: harbor
+const adminMultiSigInBase64 = Buffer.from(`"${Buffer.from(devSharedHexBytes, 'hex').toString('base64')}"`).toString('base64');
+const groupAddress = "orai18s0fxs2f3jhxxe7pkezh8dzd5pm44qt4ht5pv5";
 
 const readGenesis = async () => {
     if (!fs.existsSync(exportGenesisJsonPath)) {
@@ -34,7 +37,7 @@ const readGenesis = async () => {
     const totalBalances = await readLargeBalances();
 
     // TODO: How to calculate actual total amount of orai supply? Accumulate all from the original genesis state?
-    const jq = `'.app_state.slashing = ${slashing} | .app_state.staking = ${staking} | .validators = ${validators} | .app_state.staking.params.unbonding_time = "10s" | .app_state.gov.voting_params.voting_period = "60s" | .app_state.gov.deposit_params.min_deposit[0].amount = "1" | .app_state.gov.tally_params.quorum = "0.000000000000000000" | .app_state.gov.tally_params.threshold = "0.000000000000000000" | .app_state.mint.params.inflation_min = "0.500000000000000000" | .app_state.bank.supply[31].amount = "${totalBalances}" | .chain_id = "Oraichain-fork"'` // the supply[31] is used to fix bank invariant problem of Oraichain. Somehow there's a difference between total supply & the total balances
+    const jq = `'.app_state.slashing = ${slashing} | .app_state.staking = ${staking} | .validators = ${validators} | .app_state.staking.params.unbonding_time = "10s" | .app_state.gov.voting_params.voting_period = "60s" | .app_state.gov.deposit_params.min_deposit[0].amount = "1" | .app_state.gov.tally_params.quorum = "0.000000000000000000" | .app_state.gov.tally_params.threshold = "0.000000000000000000" | .app_state.mint.params.inflation_min = "0.500000000000000000" | .app_state.bank.supply[31].amount = "${totalBalances}" | .chain_id = "Oraichain-fork" | ${jqUpdateContractStateGroupMultisigData()}'` // the supply[31] is used to fix bank invariant problem of Oraichain. Somehow there's a difference between total supply & the total balances
 
     cp.exec(`jq ${jq} ${wantedGenesisStateJsonPath} > ${genesisJsonPath}`, (err, stdout, stderr) => {
         if (err) {
@@ -75,6 +78,11 @@ const readLargeBalances = async () => {
     }
     console.log("Finished collecting the real total supply of the orai token with total balances: ", totalBalances);
     return totalBalances.toString();
+}
+
+const jqUpdateContractStateGroupMultisigData = () => {
+    // 00076D656D62657273 is 'members' in hex
+    return `.app_state.wasm.contracts[.app_state.wasm.contracts| map(.contract_address == "${groupAddress}") | index(true)].contract_state = [{"key":"00076D656D62657273${devSharedHexBytes}","value":"MQ=="},{"key":"746F74616C","value":"MQ=="},{"key":"61646D696E","value":"${adminMultiSigInBase64}"}]`;
 }
 
 readGenesis()
