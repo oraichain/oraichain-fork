@@ -3,12 +3,13 @@
 CHAIN_ID=${CHAIN_ID:-Oraichain-fork}
 USER=${USER:-foobar}
 MONIKER=${MONIKER:-node001}
-AMOUNT=${AMOUNT:-"1000000orai"}
 
 if [[ -d ".oraid/data" ]] 
 then
     echo 'Already has data/ directory. Nothing to do!'
 else
+
+    AMOUNT="$(jq '.app_state.bank.balances[] | select(.address | contains("orai1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3xglvcy")).coins[0].amount | tonumber' genesis.json)orai"
 
     rm -rf "$PWD"/.oraid
 

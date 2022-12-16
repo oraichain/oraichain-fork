@@ -15,7 +15,7 @@ const readGenesis = async () => {
         console.log("You need to export the genesis state of your newly created node first before running this script.");
         return;
     }
-    const result = JSON.parse(Buffer.from(fs.readFileSync(exportGenesisJsonPath)).toString('ascii'));
+    let result = JSON.parse(Buffer.from(fs.readFileSync(exportGenesisJsonPath)).toString('ascii'));
     const totalUnbondingDelegations = calculateTotalUnbondingDelegations();
     const slashing = JSON.stringify(result.app_state.slashing);
     result.app_state.staking.unbonding_delegations = [{
