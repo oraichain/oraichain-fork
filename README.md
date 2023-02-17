@@ -40,3 +40,5 @@ To clear the fork network and start over, type:
 ```bash
 ./clear.sh
 ```
+
+Export genesis state command: ```oraid export 2>&1 | tee forked-genesis.json```
