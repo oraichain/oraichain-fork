@@ -15,8 +15,13 @@ const readGenesis = async () => {
         console.log("You need to export the genesis state of your newly created node first before running this script.");
         return;
     }
-    let result = JSON.parse(Buffer.from(fs.readFileSync(exportGenesisJsonPath)).toString('ascii'));
-    const totalUnbondingDelegations = calculateTotalUnbondingDelegations();
+    const [result, totalUnbondingDelegations, totalBalances, supplyLength] = await Promise.all([
+        readFilePromise(exportGenesisJsonPath).then(data => JSON.parse(Buffer.from(data).toString('ascii'))), // read genesis.json file
+        calculateTotalUnbondingDelegations(),
+        readLargeBalances(), // collect large balances so we can apply it to the new supply value
+        execPromise(`jq '.app_state.bank.supply | length' ${wantedGenesisStateJsonPath}`).then(data => Buffer.from(data).toString('ascii') - 1) // supply length
+    ]);
+
     const slashing = JSON.stringify(result.app_state.slashing);
     result.app_state.staking.unbonding_delegations = [{
         delegator_address: result.app_state.staking.delegations[0].delegator_address,
@@ -34,8 +39,6 @@ const readGenesis = async () => {
     }]
     const staking = JSON.stringify(result.app_state.staking);
     const validators = JSON.stringify(result.validators);
-    const totalBalances = await readLargeBalances();
-    const supplyLength = Buffer.from(cp.execSync(`jq '.app_state.bank.supply | length' ${wantedGenesisStateJsonPath}`)).toString('ascii') - 1;
 
     // TODO: How to calculate actual total amount of orai supply? Accumulate all from the original genesis state?
     const jq = `'.app_state.slashing = ${slashing} | .app_state.staking = ${staking} | .validators = ${validators} | .app_state.staking.params.unbonding_time = "10s" | .app_state.gov.voting_params.voting_period = "60s" | .app_state.gov.deposit_params.min_deposit[0].amount = "1" | .app_state.gov.tally_params.quorum = "0.000000000000000000" | .app_state.gov.tally_params.threshold = "0.000000000000000000" | .app_state.mint.params.inflation_min = "0.500000000000000000" | .app_state.bank.supply[${supplyLength}].amount = "${totalBalances}" | .chain_id = "Oraichain-fork" | ${jqUpdateContractStateGroupMultisigData()}'` // the supply[supplyLength] is used to fix bank invariant problem of Oraichain. Somehow there's a difference between total supply & the total balances
@@ -52,8 +55,7 @@ const readGenesis = async () => {
 
 /// The original network may have unbonding delegations going on. These tokens reside in a module account. We need to copy this and modify the unbonding delegations in staking if we want to control the voting power.
 const calculateTotalUnbondingDelegations = () => {
-    const result = JSON.parse(Buffer.from(cp.execSync(`jq '.app_state.bank.balances[] | select(.address | contains("${notBondedTokenPoolsModuleName}"))' ${wantedGenesisStateJsonPath}`)).toString('ascii'));
-    return result.coins[0].amount;
+    return execPromise(`jq '.app_state.bank.balances[] | select(.address | contains("${notBondedTokenPoolsModuleName}"))' ${wantedGenesisStateJsonPath}`).then(data => JSON.parse(Buffer.from(data).toString('ascii')).coins[0].amount);
 }
 
 const readLargeJsonFile = async () => {
@@ -84,6 +86,24 @@ const readLargeBalances = async () => {
 const jqUpdateContractStateGroupMultisigData = () => {
     // 00076D656D62657273 is 'members' in hex
     return `.app_state.wasm.contracts[.app_state.wasm.contracts| map(.contract_address == "${groupAddress}") | index(true)].contract_state = [{"key":"00076D656D62657273${devSharedHexBytes}","value":"Mw=="},{"key":"746F74616C","value":"Mw=="},{"key":"61646D696E","value":"${adminMultiSigInBase64}"}]`;
+}
+
+function execPromise(command) {
+    return new Promise((resolve, reject) => {
+        cp.exec(command, (err, data) => {
+            if (err) return reject(err)
+            resolve(data)
+        })
+    })
+}
+
+function readFilePromise(filePath) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, (err, data) => {
+            if (err) return reject(err)
+            resolve(data)
+        })
+    })
 }
 
 readGenesis()
