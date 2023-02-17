@@ -14,7 +14,8 @@
 1. Setup a new node
 
 ```bash
-./setup-genesis.sh
+# download new exported genesis url through the env var
+EXPORTED_GENESIS_URL= ./setup-genesis.sh
 ```
 
 2. Export the genesis state of the node

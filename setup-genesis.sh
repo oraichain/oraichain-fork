@@ -3,6 +3,12 @@
 CHAIN_ID=${CHAIN_ID:-Oraichain-fork}
 USER=${USER:-foobar}
 MONIKER=${MONIKER:-node001}
+EXPORTED_GENESIS_URL=${EXPORTED_GENESIS_URL:-"https://orai.s3.us-east-2.amazonaws.com/export-genesis.json"}
+
+if [[ ! -f "./genesis.json" ]]
+then
+    wget -O ./genesis.json $EXPORTED_GENESIS_URL
+fi
 
 if [[ -d ".oraid/data" ]] 
 then

@@ -35,9 +35,10 @@ const readGenesis = async () => {
     const staking = JSON.stringify(result.app_state.staking);
     const validators = JSON.stringify(result.validators);
     const totalBalances = await readLargeBalances();
+    const supplyLength = Buffer.from(cp.execSync(`jq '.app_state.bank.supply | length' ${wantedGenesisStateJsonPath}`)).toString('ascii') - 1;
 
     // TODO: How to calculate actual total amount of orai supply? Accumulate all from the original genesis state?
-    const jq = `'.app_state.slashing = ${slashing} | .app_state.staking = ${staking} | .validators = ${validators} | .app_state.staking.params.unbonding_time = "10s" | .app_state.gov.voting_params.voting_period = "60s" | .app_state.gov.deposit_params.min_deposit[0].amount = "1" | .app_state.gov.tally_params.quorum = "0.000000000000000000" | .app_state.gov.tally_params.threshold = "0.000000000000000000" | .app_state.mint.params.inflation_min = "0.500000000000000000" | .app_state.bank.supply[31].amount = "${totalBalances}" | .chain_id = "Oraichain-fork" | ${jqUpdateContractStateGroupMultisigData()}'` // the supply[31] is used to fix bank invariant problem of Oraichain. Somehow there's a difference between total supply & the total balances
+    const jq = `'.app_state.slashing = ${slashing} | .app_state.staking = ${staking} | .validators = ${validators} | .app_state.staking.params.unbonding_time = "10s" | .app_state.gov.voting_params.voting_period = "60s" | .app_state.gov.deposit_params.min_deposit[0].amount = "1" | .app_state.gov.tally_params.quorum = "0.000000000000000000" | .app_state.gov.tally_params.threshold = "0.000000000000000000" | .app_state.mint.params.inflation_min = "0.500000000000000000" | .app_state.bank.supply[${supplyLength}].amount = "${totalBalances}" | .chain_id = "Oraichain-fork" | ${jqUpdateContractStateGroupMultisigData()}'` // the supply[31] is used to fix bank invariant problem of Oraichain. Somehow there's a difference between total supply & the total balances
 
     cp.exec(`jq ${jq} ${wantedGenesisStateJsonPath} > ${genesisJsonPath}`, (err, stdout, stderr) => {
         if (err) {
